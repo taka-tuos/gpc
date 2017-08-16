@@ -1,0 +1,33 @@
+function entry()
+	val32 .dim
+	ptr32 .pixel
+	
+	@pixel = 0x10000
+	
+	val32 .x
+	val32 .y
+	
+	val32 .r
+	val32 .g
+	val32 .b
+	
+	for(.y = 0,[.y < 480],.y = .y + 1)
+		for(.x = 0,[.x < 640],.x = .x + 1)
+			.r = 255 - .y / 2
+			.g = .x / 3
+			.b = 255 - .x / 3
+			
+			@pixel = 0x10000 + (.y * 640 + .x) * 4
+			:pixel = (.r * 65536) + (.g * 256) + .b
+		next
+	next
+	
+	asm out($1,$1)
+	
+	@pixel = 0x10000
+	
+	for(.dim = 0,[.dim == 0],.dim = 0)
+		:pixel = :pixel + 1
+		asm out($1,$1)
+	next
+endf

@@ -1,0 +1,71 @@
+#define_s string0 gpc-casm-mip compiler test
+#define_s string1 gpc-casm-mip fullcolor test
+#define_s string2 日本語フルカラー　テスト
+
+#define_f openwin(val32 .addr,val32 .sx,val32 .sy,val32 .str,val32 .col_inv)
+#define_f makebutton(val32 .x0,val32 .y0,val32 .x1,val32 .y1,val32 .str)
+#define_f chkbt()
+
+function entry()
+	val32 .dim
+	ptr32 .pixel
+	
+	@pixel = 0x2000
+
+	$openwin(@pixel,256,256,$string0,0xff000000)
+	$makebutton(16,128,240,176,$string1)
+	
+	val32 .col
+	
+	.col = 0
+	
+	val32 .a
+	
+	for(.a = 0x2000,[.a < 0x42000],.a = .a + 4)
+		@pixel = .a
+		:pixel = 0x0000
+	next
+	
+	for(.dim = 0,[.dim == 0],.dim = 0)
+		val32 .bf
+		$chkbt()
+		sreg(8,.bf)
+		if[.bf == 1]
+			lreg(0,3)
+			lreg(1,0x10)
+			lreg(2,0x40)
+			lreg(3,.col)
+			lreg(4,$string2)
+			asm int($0x20)
+			.col = .col + 0x10
+			if[.col >= 0xffffff]
+				.col = 0
+			fi
+		fi
+	next
+endf
+
+function openwin(val32 .addr,val32 .sx,val32 .sy,val32 .str,val32 .col_inv)
+	lreg(0,1)
+	lreg(1,.addr)
+	lreg(2,.sx)
+	lreg(3,.sy)
+	lreg(4,.col_inv)
+	lreg(5,.str)
+	asm int($0x20)
+endf
+
+function makebutton(val32 .x0,val32 .y0,val32 .x1,val32 .y1,val32 .str)
+	lreg(0,4)
+	lreg(1,.x0)
+	lreg(2,.y0)
+	lreg(3,.x1)
+	lreg(4,.y1)
+	lreg(5,.str)
+	asm int($0x20)
+endf
+
+function chkbt()
+	lreg(0,5)
+	asm int($0x20)
+endf
